@@ -28,6 +28,8 @@ elif torch.cuda.is_available():
     DEVICE = torch.device("cuda")   
 else:
     DEVICE = torch.device("cpu")
+print(f"Using Device : {DEVICE}")
+
 
 
 def load_and_preprocess_data(data_path, test_size : float = 0.2, validation_size : float = 0.2, random_state : int = 21):
