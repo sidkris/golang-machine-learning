@@ -92,7 +92,45 @@ class HousePricePredictor(nn.Module):
         return x
     
 def train_model(model, X_train, y_train, X_val, y_val, X_test, y_test, target_scaler, epochs = 250, lr = 0.001, patience = 50, min_delta = 0.0001):
-    pass
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr = lr)
+    best_val_loss = float('inf')
+    epochs_with_no_improvement = 0
+    early_stop = False 
+    best_model_state = None 
+
+    print(f"\nStarting Model Training for {epochs} epochs with early stopping (patience = {patience})...")
+
+    try:
+        with tqdm(range(epochs), desc = "TRAINING PROGRESS") as progress_bar:
+            for epoch in progress_bar:
+                if early_stop:
+                    break
+                else:
+                    model.train()
+                    outputs = model(X_train)
+                    loss = criterion(outputs, y_train)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+                
+                # evaluate on validation set
+                model.eval()
+                with torch.no_grad():
+                    val_outputs = model(X_val)
+                    val_loss = criterion(val_outputs, y_val)
+                
+                if val_loss.item() < best_val_loss - min_delta:
+                    best_val_loss = val_loss.item()
+                    epochs_with_no_improvement = 0
+                    best_model_state = model.state_dict()
+                else:
+                    epochs_with_no_improvement += 1
+                    if epochs_with_no_improvement == patience:
+                        print(f"*** TRIGERRING EARLY STOPPING at {epoch + 1} -- No imporovement in model observed ***")
+
+    except Exception as e:
+        print(f"TRAINING TERMINATED -- As Error Occured During Training : {e}")
 
 if __name__ == "__main__":
 
