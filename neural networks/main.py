@@ -90,6 +90,9 @@ class HousePricePredictor(nn.Module):
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+    
+def train_model(model, X_train, y_train, X_val, y_val, X_test, y_test, target_scaler, epochs = 250, lr = 0.001, patience = 50, min_delta = 0.0001):
+    pass
 
 if __name__ == "__main__":
 
