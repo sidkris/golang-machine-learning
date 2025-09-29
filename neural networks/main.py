@@ -128,6 +128,35 @@ def train_model(model, X_train, y_train, X_val, y_val, X_test, y_test, target_sc
                     epochs_with_no_improvement += 1
                     if epochs_with_no_improvement == patience:
                         print(f"*** TRIGERRING EARLY STOPPING at {epoch + 1} -- No imporovement in model observed ***")
+                        early_stop = True
+                
+                progress_bar.set_postfix(f"TRAIN LOSS : {loss.item():.4f} | VAL LOSS : {val_loss.item():.4f}")
+
+        print("Training Complete.")
+
+        # Best model state
+        if best_model_state:
+            model.load_state_dict(best_model_state)
+            print("Loaded the best model state..")
+        else:
+            print("No improvement found during training. Using final model state for evaluation.")
+        
+        # Final model evaluation on the test set
+        print("\n--- FINAL MODEL EVALUATION ON THE TEST SET ---\n")
+        model.eval()
+        with torch.no_grad():
+            test_outputs_scaled = model(X_test).cpu().numpy()
+            y_test_cpu = y_test.cpu().numpy()
+
+            # inverse transform predictions and actual values to original scale interpretable metrics
+            actual_prices = target_scaler.inverse_transform(y_test_cpu)
+            predicted_prices = target_scaler.inverse_transform(test_outputs_scaled)
+
+            final_test_error = mean_squared_error(actual_prices, predicted_prices)
+            mae = mean_absolute_error(actual_prices, predicted_prices)
+            r2 = r2_score(actual_prices, predicted_prices)
+
+            print(f"TEST MSE : {final_test_error:.2f} | TEST MAE : {mae:.2f} | TEST R2 : {r2:.2f}")
 
     except Exception as e:
         print(f"TRAINING TERMINATED -- As Error Occured During Training : {e}")
