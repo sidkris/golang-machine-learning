@@ -71,6 +71,26 @@ def load_and_preprocess_data(data_path, test_size : float = 0.2, validation_size
 
     return X_train_tensor, y_train_tensor, X_val_tensor, y_val_tensor, X_test_tensor, y_test_tensor, feature_scaler, target_scaler
 
+
+class HousePricePredictor(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Input features : sq. footage, number of bedrooms, number of bathrooms
+        self.fc1 = nn.Linear(3, 64)         
+        # Hidden Layer
+        self.fc2 = nn.Linear(64, 32)
+        # Output Layer
+        self.fc3 = nn.Linear(32, 1)
+
+        # Activation function
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
 if __name__ == "__main__":
 
     # command line flags
@@ -84,6 +104,10 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--train", action = "store_true", help = "Train the model and save as an ONNX file."
+    )
+
+    parser.add_argument(
+        "--predict", action = "store_true", help = "Load an ONNX model and make predcition(s)"
     )
 
     parser.add_argument(
@@ -120,3 +144,11 @@ if __name__ == "__main__":
     if args.train :
         print("--- Training Mode ---")
         X_train, y_train, X_val, y_val, X_test, y_test, feature_scaler, target_scaler = load_and_preprocess_data(args.data_path)
+        if X_train is not None:
+            model = HousePricePredictor().to(DEVICE)
+    elif args.predict:
+        print("--- Prediction Mode ---")
+
+    else:
+        print("Error : Please specify either --train or --predict")
+        parser.print_help()
