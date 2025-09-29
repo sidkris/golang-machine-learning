@@ -86,6 +86,35 @@ if __name__ == "__main__":
         "--train", action = "store_true", help = "Train the model and save as an ONNX file."
     )
 
+    parser.add_argument(
+        "--model_path", type = str, default = MODEL_ONNX_FILE, help = "Path to save / load the ONNX model to / from"
+    )
+
+    parser.add_argument(
+        "--scaler_path", type = str, default = SCALER_FILE, help = "Path to save / load the MinMaxScaler objects"
+    )
+
+    parser.add_argument(
+        "--input_features", type = str, help = "Comma separated input features for prediction (eg. '1000, 1, 5'). To be used with --predict"
+    )
+
+    parser.add_argument(
+        "--epochs", type = int, default = 250, help = "Number of training iterations (defaults to 250). Use with --train"
+    )
+
+    parser.add_argument(
+        "--lr", type = float, default = 0.001, help = "Model learning rate for training (defaults to 0.001)"
+    )
+
+    parser.add_argument(
+        "--patience", type = int, default = 50, help = "Number of epochs to wait for improvement before enforcing early stopping (defaults to 50). Use with --train"
+    )
+
+    parser.add_argument(
+        "--min_delta", type = float, default = 0.0001, help = "Minimum change in test loss to qualify as an 'improvement' from an early stopping perspective (defaults to 0.0001). Use with --train"
+    )
+
+
     args = parser.parse_args()
 
     if args.train :
